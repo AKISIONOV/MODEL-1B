@@ -170,14 +170,35 @@ RECOMMENDATIONS = {
 }
 
 MODEL_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(MODEL_DIR, "models", "swineffdr_full.pth")
+MODELS_FOLDER = os.path.join(MODEL_DIR, "models")
+MODEL_PATH = os.path.join(MODELS_FOLDER, "swineffdr_full.pth")
+
+# Google Drive file ID for the model weights
+# To get this: upload swineffdr_full.pth to Google Drive → Share → "Anyone with link" → copy the ID from the URL
+GDRIVE_FILE_ID = "PASTE_YOUR_GOOGLE_DRIVE_FILE_ID_HERE"
+
+
+def download_model_weights():
+    """Download model weights from Google Drive if not present locally."""
+    if os.path.exists(MODEL_PATH):
+        return
+    os.makedirs(MODELS_FOLDER, exist_ok=True)
+    import gdown
+    url = f"https://drive.google.com/uc?id={GDRIVE_FILE_ID}"
+    st.info("⬇️ Downloading model weights (~406 MB) … this only happens once.")
+    gdown.download(url, MODEL_PATH, quiet=False)
+    if not os.path.exists(MODEL_PATH):
+        st.error("❌ Model download failed. Please check the Google Drive link.")
+        st.stop()
+
 
 # ── Model loading (cached) ───────────────────────────────
 @st.cache_resource(show_spinner=False)
 def load_model():
+    download_model_weights()
     from model import SwinEffDR
     model = SwinEffDR(num_classes=5)
-    state = torch.load(MODEL_PATH, map_location="cpu")
+    state = torch.load(MODEL_PATH, map_location="cpu", weights_only=True)
     model.load_state_dict(state, strict=False)
     model.eval()
     return model
