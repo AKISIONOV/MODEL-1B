@@ -173,22 +173,21 @@ MODEL_DIR = os.path.dirname(os.path.abspath(__file__))
 MODELS_FOLDER = os.path.join(MODEL_DIR, "models")
 MODEL_PATH = os.path.join(MODELS_FOLDER, "swineffdr_full.pth")
 
-# Google Drive file ID for the model weights
-# To get this: upload swineffdr_full.pth to Google Drive → Share → "Anyone with link" → copy the ID from the URL
-GDRIVE_FILE_ID = "PASTE_YOUR_GOOGLE_DRIVE_FILE_ID_HERE"
+# Google Drive folder ID containing the model weights
+GDRIVE_FOLDER_ID = "1JBDp1U17g77irZLHVHAGqDPByHIvo7B_"
 
 
 def download_model_weights():
-    """Download model weights from Google Drive if not present locally."""
+    """Download model weights from Google Drive folder if not present locally."""
     if os.path.exists(MODEL_PATH):
         return
     os.makedirs(MODELS_FOLDER, exist_ok=True)
     import gdown
-    url = f"https://drive.google.com/uc?id={GDRIVE_FILE_ID}"
+    url = f"https://drive.google.com/drive/folders/{GDRIVE_FOLDER_ID}"
     st.info("⬇️ Downloading model weights (~406 MB) … this only happens once.")
-    gdown.download(url, MODEL_PATH, quiet=False)
+    gdown.download_folder(url, output=MODELS_FOLDER, quiet=False)
     if not os.path.exists(MODEL_PATH):
-        st.error("❌ Model download failed. Please check the Google Drive link.")
+        st.error("❌ Model download failed. Please check the Google Drive folder link.")
         st.stop()
 
 
